@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pátio Vivo - Portal de Acesso</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="modo-claro">
+
+    <!-- Notificações de Alerta (Topo) -->
+    <div id="alerta-sistema" class="alerta-sistema hidden"></div>
+
+    <!-- Tela Inicial de Escolha de Perfil e Apresentação do Projeto -->
+    <div id="tela-escolha" class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h1 style="margin-bottom: 0;">Pátio Vivo</h1>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-tema-topo" onclick="toggleTema()" title="Alternar Modo Escuro/Claro">🌓</button>
+            </div>
+        </header>
+        
+        <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">Selecione uma opção para acessar o sistema</p>
+        
+        <div class="btn-group">
+            <button class="btn-aluno" onclick="escolherPerfil('aluno')">Aluno</button>
+            <button class="btn-professor" onclick="escolherPerfil('professor')">Professor</button>
+            <button class="btn-coordenador" onclick="escolherPerfil('coordenador')">Coordenador</button>
+            <button class="btn-sobre-projeto" onclick="abrirTelaSobreProjeto()">Sobre o Projeto</button>
+        </div>
+
+        <!-- Card Explicativo: História e Propósito do Pátio Vivo -->
+        <div class="card-manifesto">
+            <h3>Como Nasceu o Pátio Vivo?</h3>
+            <p>O <strong>Pátio Vivo</strong> nasceu da nossa própria vivência no <strong>EREM Professor Epitácio André Dias</strong>. Durante um trabalho de Matemática em que precisamos tirar as medidas do pátio para desenhar uma planta baixa e propor uma reforma, percebemos algo muito maior: quase toda escola da rede estadual tem cantos incríveis que hoje estão subutilizados.</p>
+            
+            <p style="margin-top: 10px;">No nosso colégio, por exemplo, o pátio externo dos fundos e a área atrás da quadra têm um potencial gigante. Até mesmo no refeitório, o espaço menor perto da biblioteca (onde ficam os cobogós) poderia virar um mini auditório ou sala de cinema e exibições ao ar livre.</p>
+
+            <hr class="divisor-manifesto">
+            
+            <h4>A Nossa Proposta</h4>
+            <ul class="lista-impacto">
+                <li><strong>Ganha-Voz para Estudantes:</strong> Um canal direto para os alunos sugerirem, desenharem e votarem nas melhorias prioritárias da escola.</li>
+                <li><strong>Diagnóstico para a Gestão:</strong> Ajuda a diretoria e a coordenação a entenderem exatamente o que a comunidade escolar quer antes de reformar.</li>
+                <li><strong>Aulas e Leitura ao Ar Livre:</strong> Facilita para os professores reservarem espaços abertos para aulas práticas, debates e saraus.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tela de Autenticação (Login / Cadastro) -->
+    <div id="tela-auth" class="container hidden">
+        <button class="btn-voltar-seta-simples" onclick="voltarParaEscolha()" title="Voltar">←</button>
+        <h2 id="auth-titulo">Login</h2>
+        
+        <div class="auth-tabs">
+            <button id="tab-login" class="tab-btn active" onclick="mudarAbaAuth('login')">Entrar</button>
+            <button id="tab-cadastro" class="tab-btn" onclick="mudarAbaAuth('cadastro')">Cadastrar</button>
+        </div>
+
+        <div id="form-auth" class="auth-form"></div>
+
+        <div id="box-lembrar" class="lembrar-senha-box">
+            <label class="checkbox-container">
+                <input type="checkbox" id="check-lembrar" checked>
+                <span class="checkmark"></span>
+                Manter dados salvos (Login automático)
+            </label>
+        </div>
+    </div>
+
+    <!-- Tela de Recuperação de Senha (Com Validação por PIN) -->
+    <div id="tela-esqueci-senha" class="container hidden">
+        <button class="btn-voltar-seta-simples" onclick="voltarParaAuth()" title="Voltar">←</button>
+        <h2>Recuperar Senha</h2>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Informe o e-mail cadastrado para receber o PIN de segurança de 4 dígitos.</p>
+
+        <div class="auth-form">
+            <input type="email" id="rec-email" placeholder="Digite seu e-mail cadastrado">
+            <button class="btn-salvar" style="width: 100%; padding: 12px;" onclick="solicitarPinRecuperacao()">Gerar / Enviar PIN</button>
+
+            <!-- Box do PIN (Aparece após solicitar) -->
+            <div id="box-pin-secao" class="hidden" style="margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
+                <span class="label-pequeno">Digite o PIN recebido (4 dígitos)</span>
+                <input type="text" id="rec-pin-input" placeholder="Ex: 4821" maxlength="4" style="letter-spacing: 4px; text-align: center; font-size: 18px; font-weight: bold;">
+                
+                <span class="label-pequeno" style="margin-top: 10px;">Nova Senha</span>
+                <input type="password" id="rec-nova-senha" placeholder="Nova senha">
+                
+                <span class="label-pequeno" style="margin-top: 6px;">Confirme a Nova Senha</span>
+                <input type="password" id="rec-confirma-senha" placeholder="Confirme a nova senha">
+
+                <button class="btn-enviar" style="background: #10b981; color: white; margin-top: 12px;" onclick="confirmarRedefinicaoSenhaComPin()">Redefinir Senha</button>
+                <button class="btn-cancelar" style="width: 100%; margin-top: 8px;" onclick="reenviarPinRecuperacao()">Reenviar PIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela Dedicada: "Sobre o Projeto" -->
+    <div id="tela-sobre" class="portal-container portal-sobre hidden">
+        <header class="portal-header">
+            <button class="btn-voltar-seta" onclick="voltarParaEscolha()" title="Voltar">←</button>
+            <nav class="nav-opcoes">
+                <button onclick="mudarSecaoSobre('historia')" class="nav-btn active">História & Vivência</button>
+                <button onclick="mudarSecaoSobre('propostas')" class="nav-btn">Propostas Detalhadas</button>
+                <button onclick="mudarSecaoSobre('mural')" class="nav-btn">Mural Aberto</button>
+            </nav>
+            <div class="anonimo-switch-topo">
+                <button class="btn-tema-topo" onclick="toggleTema()" title="Alternar Modo Escuro/Claro">🌓</button>
+            </div>
+        </header>
+
+        <main class="portal-content">
+            <div id="secao-sobre-historia" class="secao-aluno">
+                <h2>A Nossa História e Motivação</h2>
+                <div class="carta-box">
+                    <p>O <strong>Pátio Vivo</strong> surgiu a partir de uma atividade prática passada pelo nosso professor de Matemática para todas as turmas do 1º ano no <strong>EREM Professor Epitácio André Dias</strong>. A tarefa era medir o pátio externo e pensar em plantas de reforma. Foi aí que percebemos que a escola tem espaços valiosos que poderiam ser muito mais bem aproveitados.</p>
+                    
+                    <hr class="divisor-manifesto">
+
+                    <h4>A Adaptação ao Ensino Médio e ao Tempo Integral</h4>
+                    <p>A transição do 9º ano para o 1º ano do Ensino Médio traz muitas mudanças. A gente se separa de antigos colegas de classe, encarando novas turmas, novas dinâmicas sociais e a adaptação a uma rotina de tempo integral. Passar a maior parte do dia na escola exige que o ambiente seja acolhedor.</p>
+                    <p style="margin-top: 8px;">Quando a rotina se repete sem espaços de respiro, a escola pode parecer cansativa. O Pátio Vivo defende que o colégio precisa ter cantos agradáveis para leitura, música, estudo ao ar livre e conversas nos intervalos — tornando a convivência mais leve para todo mundo.</p>
+                </div>
+            </div>
+
+            <div id="secao-sobre-propostas" class="secao-aluno hidden">
+                <h2>Ideias e Propostas de Revitalização</h2>
+                <div class="carta-box">
+                    <p class="carta-data" style="margin-bottom: 12px; color: #047857;"><em>Sugestões desenvolvidas durante os estudos de espaço e Matemática:</em></p>
+                    <ul class="lista-impacto">
+                        <li><strong>Espaço dos Cobogós (Refeitório):</strong> Adaptar a área próxima à biblioteca para virar um mini auditório e espaço de exibições/cinema.</li>
+                        <li><strong>Laboratório Vivo no Pátio Externo:</strong> Colocar pias e bancadas para experimentos práticos de Química e Física, além de horta.</li>
+                        <li><strong>Reutilização de Água dos Ar-Condicionados:</strong> Aproveitar a água que pinga dos aparelhos para irrigar plantas.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="secao-sobre-mural" class="secao-aluno hidden">
+                <h2>Mural de Sugestões Abertas</h2>
+                <div class="carta-box">
+                    <p style="font-size: 13px; color: #475569; margin-bottom: 10px;">Compartilhe uma ideia ou comentário sobre os espaços da nossa escola:</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <input type="text" id="publico-nome-ideia" placeholder="Seu nome ou turma (opcional)" class="input-estilizado" style="font-size: 13px; padding: 8px;">
+                        <textarea id="publico-texto-ideia" placeholder="Escreva aqui sua sugestão para o colégio..." style="min-height: 80px; font-size: 13px; padding: 8px;"></textarea>
+                        <button class="btn-enviar" style="background: #0284c7; color: white; padding: 10px; font-size: 14px;" onclick="enviarIdeiaPublica()">Publicar Ideia no Mural</button>
+                    </div>
+                    <div id="lista-ideias-publicas" class="lista-cartas" style="margin-top: 15px; max-height: 200px;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Área do Aluno -->
+    <div id="tela-aluno" class="portal-container portal-aluno hidden">
+        <header class="portal-header">
+            <button class="btn-voltar-seta" onclick="voltarParaEscolha()" title="Voltar">←</button>
+            <nav class="nav-opcoes">
+                <button onclick="mudarSecaoAluno('menu')" class="nav-btn active">Menu</button>
+                <button onclick="mudarSecaoAluno('ler')" class="nav-btn">Ler</button>
+                <button onclick="mudarSecaoAluno('votacao')" class="nav-btn">Votação</button>
+                <button onclick="mudarSecaoAluno('perfil')" class="nav-btn">Perfil</button>
+            </nav>
+            <div class="anonimo-switch-topo">
+                <button class="btn-tema-topo" onclick="toggleTema()" title="Alternar Modo Escuro/Claro">🌓</button>
+            </div>
+        </header>
+
+        <main class="portal-content">
+            <div id="secao-aluno-menu" class="secao-aluno">
+                <h2>Seja bem-vindo, aluno</h2>
+                <div class="carta-box">
+                    <span class="label-pequeno">enviar proposta de espaço / mensagem</span>
+                    <textarea id="texto-carta" placeholder="Descreva sua ideia de revitalização..."></textarea>
+                    <button class="btn-enviar" onclick="enviarCarta()">Enviar Proposta</button>
+                </div>
+            </div>
+
+            <div id="secao-aluno-ler" class="secao-aluno hidden">
+                <h2>Mural Comunitário & Propostas</h2>
+                <div id="lista-cartas-aluno" class="lista-cartas"></div>
+            </div>
+
+            <div id="secao-aluno-votacao" class="secao-aluno hidden">
+                <h2>Área de Votação de Espaços</h2>
+                <div id="lista-enquetes-aluno" class="lista-cartas">
+                    <p class="carta-data">Nenhuma enquete ativa no momento.</p>
+                </div>
+            </div>
+
+            <div id="secao-aluno-perfil" class="secao-aluno hidden">
+                <h2>Meu Perfil</h2>
+                <div class="perfil-card">
+                    <div class="perfil-topo">
+                        <div class="perfil-coluna-foto">
+                            <div class="perfil-foto-container">
+                                <img id="perfil-img-aluno" src="" alt="Foto" class="perfil-foto">
+                            </div>
+                            <button class="btn-mudar-foto-pequeno" onclick="abrirModalEdicao()">mudar</button>
+                        </div>
+                        <div class="perfil-info-basica">
+                            <h3 id="perfil-nome-aluno">Nome do Aluno</h3>
+                            <span id="perfil-email-aluno" class="email-pequeno">email@exemplo.com</span>
+                            <span id="perfil-idade-aluno" class="info-adicional">Idade: -</span>
+                            <span id="perfil-escola-aluno" class="info-adicional">Escola: -</span>
+                        </div>
+                    </div>
+
+                    <div class="biografia-box">
+                        <span class="label-pequeno">Sobre mim</span>
+                        <p id="perfil-biografia-aluno" class="biografia-texto">Nenhuma descrição adicionada ainda.</p>
+                    </div>
+
+                    <div class="tema-linha" style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 10px 0;">
+                        <span class="label-pequeno" style="margin-bottom:0;">Status da Conta:</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="label-status-anonimo-aluno" class="label-pequeno" style="margin-bottom:0;">Ativa</span>
+                            <label class="switch">
+                                <input type="checkbox" id="check-anonimo-aluno" onchange="toggleModoAnonimoPerfil('aluno')">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="perfil-senha-secao">
+                        <div class="senha-linha">
+                            <span class="label-pequeno">Senha:</span>
+                            <span id="perfil-senha-texto-aluno" class="senha-pontos">••••••••</span>
+                            <button class="btn-icone" onclick="toggleMostrarSenha('aluno')" title="Mostrar Senha">👁️</button>
+                            <button class="btn-link" onclick="toggleMudarSenhaForm('aluno')">Mudar senha</button>
+                        </div>
+
+                        <div id="form-mudar-senha-aluno" class="hidden mudar-senha-box">
+                            <input type="password" id="senha-antiga-aluno" placeholder="Senha antiga">
+                            <input type="password" id="senha-nova-aluno" placeholder="Nova senha">
+                            <input type="password" id="senha-confirma-aluno" placeholder="Confirme a nova senha">
+                            <div class="btn-senha-grupo">
+                                <button class="btn-salvar" onclick="salvarNovaSenha('aluno')">Confirmar</button>
+                                <button class="btn-cancelar" onclick="toggleMudarSenhaForm('aluno')">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="perfil-acoes">
+                        <button class="btn-medio btn-sair" onclick="sairPerfil()">Sair</button>
+                        <button class="btn-medio btn-excluir" onclick="excluirConta()">Excluir</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Área do Professor -->
+    <div id="tela-professor" class="portal-container portal-professor hidden">
+        <header class="portal-header">
+            <button class="btn-voltar-seta" onclick="voltarParaEscolha()" title="Voltar">←</button>
+            <nav class="nav-opcoes">
+                <button onclick="mudarSecaoProfessor('agenda')" class="nav-btn active">Agendar</button>
+                <button onclick="mudarSecaoProfessor('proposta')" class="nav-btn">Propor</button>
+                <button onclick="mudarSecaoProfessor('forum')" class="nav-btn">Fórum</button>
+                <button onclick="mudarSecaoProfessor('perfil')" class="nav-btn">Perfil</button>
+            </nav>
+            <div class="anonimo-switch-topo">
+                <button class="btn-tema-topo" onclick="toggleTema()" title="Alternar Modo Escuro/Claro">🌓</button>
+            </div>
+        </header>
+
+        <main class="portal-content">
+            <div id="secao-professor-agenda">
+                <h2>Painel Pedagógico - Agendamento de Espaços</h2>
+                <div class="carta-box">
+                    <span class="label-pequeno">Selecione o local para sua aula</span>
+                    <select id="select-espaco-prof" class="select-estilizado">
+                        <option value="Anfiteatro / Quadra">Anfiteatro / Área da Quadra</option>
+                        <option value="Cantinho de Leitura / Pátio">Cantinho de Leitura ao Ar Livre</option>
+                        <option value="Espaço de Exibições / Cobogós">Espaço de Exibições / Cobogós no Refeitório</option>
+                        <option value="Horta Pedagógica / Descampado">Horta Pedagógica / Descampado dos Fundos</option>
+                    </select>
+
+                    <span class="label-pequeno" style="margin-top: 10px;">Descrição da atividade pedagógica</span>
+                    <textarea id="texto-agendamento-prof" placeholder="Ex: Aula prática de Biologia..."></textarea>
+                    <button class="btn-enviar" onclick="solicitarReservaProf()">Confirmar Reserva de Espaço</button>
+                </div>
+            </div>
+
+            <div id="secao-professor-proposta" class="secao-aluno hidden">
+                <h2>Propor Trabalho Prático nos Espaços</h2>
+                <div class="carta-box">
+                    <span class="label-pequeno">Área de Conhecimento / Disciplina</span>
+                    <input type="text" id="prof-disciplina" placeholder="Ex: Artes / Biologia" class="input-estilizado">
+                    <span class="label-pequeno" style="margin-top: 10px;">Título e Descrição do Projeto</span>
+                    <textarea id="prof-texto-projeto" placeholder="Ex: Criação de Painel..."></textarea>
+                    <button class="btn-enviar" onclick="enviarProjetoProf()">Enviar Projeto para Coordenação</button>
+                </div>
+            </div>
+
+            <div id="secao-professor-forum" class="secao-aluno hidden">
+                <h2>Fórum Interdisciplinar de Professores</h2>
+                <div class="carta-box" style="margin-bottom: 15px;">
+                    <textarea id="texto-forum-prof" placeholder="Compartilhe dicas de projetos..."></textarea>
+                    <button class="btn-enviar" onclick="postarForumProf()">Publicar no Mural Docente</button>
+                </div>
+                <div id="lista-forum-professores" class="lista-cartas"></div>
+            </div>
+
+            <div id="secao-professor-perfil" class="secao-aluno hidden">
+                <h2>Meu Perfil (Docente)</h2>
+                <div class="perfil-card">
+                    <div class="perfil-topo">
+                        <div class="perfil-coluna-foto">
+                            <div class="perfil-foto-container">
+                                <img id="perfil-img-professor" src="" alt="Foto" class="perfil-foto">
+                            </div>
+                            <button class="btn-mudar-foto-pequeno" onclick="abrirModalEdicao()">mudar</button>
+                        </div>
+                        <div class="perfil-info-basica">
+                            <h3 id="perfil-nome-professor">Professor(a)</h3>
+                            <span id="perfil-email-professor" class="email-pequeno">email@exemplo.com</span>
+                            <span id="perfil-idade-professor" class="info-adicional">Idade: -</span>
+                            <span id="perfil-escola-professor" class="info-adicional">Escola: -</span>
+                        </div>
+                    </div>
+
+                    <div class="biografia-box">
+                        <span class="label-pequeno">Sobre mim</span>
+                        <p id="perfil-biografia-professor" class="biografia-texto">Nenhuma descrição adicionada ainda.</p>
+                    </div>
+
+                    <div class="tema-linha" style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 10px 0;">
+                        <span class="label-pequeno" style="margin-bottom:0;">Status da Conta:</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="label-status-anonimo-professor" class="label-pequeno" style="margin-bottom:0;">Ativa</span>
+                            <label class="switch">
+                                <input type="checkbox" id="check-anonimo-professor" onchange="toggleModoAnonimoPerfil('professor')">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="perfil-senha-secao">
+                        <div class="senha-linha">
+                            <span class="label-pequeno">Senha:</span>
+                            <span id="perfil-senha-texto-professor" class="senha-pontos">••••••••</span>
+                            <button class="btn-icone" onclick="toggleMostrarSenha('professor')" title="Mostrar Senha">👁️</button>
+                            <button class="btn-link" onclick="toggleMudarSenhaForm('professor')">Mudar senha</button>
+                        </div>
+
+                        <div id="form-mudar-senha-professor" class="hidden mudar-senha-box">
+                            <input type="password" id="senha-antiga-professor" placeholder="Senha antiga">
+                            <input type="password" id="senha-nova-professor" placeholder="Nova senha">
+                            <input type="password" id="senha-confirma-professor" placeholder="Confirme a nova senha">
+                            <div class="btn-senha-grupo">
+                                <button class="btn-salvar" onclick="salvarNovaSenha('professor')">Confirmar</button>
+                                <button class="btn-cancelar" onclick="toggleMudarSenhaForm('professor')">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="perfil-acoes" style="margin-top: 15px;">
+                        <button class="btn-medio btn-sair" onclick="sairPerfil()">Sair</button>
+                        <button class="btn-medio btn-excluir" onclick="excluirConta()">Excluir</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Área da Coordenação -->
+    <div id="tela-coordenador" class="portal-container portal-coordenador hidden">
+        <header class="portal-header">
+            <button class="btn-voltar-seta" onclick="voltarParaEscolha()" title="Voltar">←</button>
+            <nav class="nav-opcoes">
+                <button onclick="mudarSecaoCoord('pendentes')" class="nav-btn active">Análise</button>
+                <button onclick="mudarSecaoCoord('andamento')" class="nav-btn">Andamento</button>
+                <button onclick="mudarSecaoCoord('aprovados')" class="nav-btn">Concluídos</button>
+                <button onclick="mudarSecaoCoord('enquetes')" class="nav-btn">Enquetes</button>
+                <button onclick="mudarSecaoCoord('perfil')" class="nav-btn">Perfil</button>
+            </nav>
+            <div class="anonimo-switch-topo">
+                <button class="btn-tema-topo" onclick="toggleTema()" title="Alternar Modo Escuro/Claro">🌓</button>
+            </div>
+        </header>
+
+        <main class="portal-content">
+            <div id="secao-coord-pendentes">
+                <h4 style="margin-bottom: 15px;">Propostas Recebidas (Alunos & Professores)</h4>
+                <div id="lista-cartas-coordenador" class="lista-cartas"></div>
+            </div>
+
+            <div id="secao-coord-andamento" class="secao-aluno hidden">
+                <h3 class="welcome-message">Painel de Monitoramento da Gestão</h3>
+                <h4 style="margin-bottom: 15px;">Obras e Trabalhos Ativos na Escola</h4>
+                <div id="lista-projetos-andamento" class="lista-cartas"></div>
+            </div>
+
+            <div id="secao-coord-aprovados" class="secao-aluno hidden">
+                <h3 class="welcome-message">Painel de Monitoramento da Gestão</h3>
+                <h4 style="margin-bottom: 15px;">Espaços Revitalizados e Finalizados</h4>
+                <div id="lista-projetos-concluidos" class="lista-cartas"></div>
+            </div>
+
+            <div id="secao-coord-enquetes" class="secao-aluno hidden">
+                <h3>Criar Enquete de Votação Oficial</h3>
+                <div class="carta-box">
+                    <span class="label-pequeno">Título da Enquete</span>
+                    <input type="text" id="coord-titulo-enquete" placeholder="Ex: Qual espaço devemos priorizar?" class="input-estilizado" style="margin-bottom: 10px;">
+                    <span class="label-pequeno">Opções (separadas por vírgula)</span>
+                    <input type="text" id="coord-opcoes-enquete" placeholder="Ex: Cinema, Horta, Leitura" class="input-estilizado" style="margin-bottom: 10px;">
+                    <button class="btn-enviar" onclick="publicarEnqueteCoord()">Publicar Enquete para os Alunos</button>
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <h3>Gerenciar Enquete Atual</h3>
+                    <div id="painel-ultima-enquete-coord"></div>
+                </div>
+            </div>
+
+            <div id="secao-coord-perfil" class="secao-aluno hidden">
+                <h2>Perfil da Coordenação</h2>
+                <div class="perfil-card">
+                    <div class="perfil-topo">
+                        <div class="perfil-coluna-foto">
+                            <div class="perfil-foto-container">
+                                <img id="perfil-img-coordenador" src="" alt="Foto" class="perfil-foto">
+                            </div>
+                            <button class="btn-mudar-foto-pequeno" onclick="abrirModalEdicao()">mudar</button>
+                        </div>
+                        <div class="perfil-info-basica">
+                            <h3 id="perfil-nome-coordenador">Coordenação Pedagógica</h3>
+                            <span id="perfil-email-coordenador" class="email-pequeno">coordenacao@escola.com</span>
+                            <span id="perfil-idade-coordenador" class="info-adicional">Idade: -</span>
+                            <span id="perfil-escola-coordenador" class="info-adicional">Escola: -</span>
+                        </div>
+                    </div>
+
+                    <div class="biografia-box">
+                        <span class="label-pequeno">Sobre mim</span>
+                        <p id="perfil-biografia-coordenador" class="biografia-texto">Nenhuma descrição adicionada ainda.</p>
+                    </div>
+
+                    <div class="tema-linha" style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 10px 0;">
+                        <span class="label-pequeno" style="margin-bottom:0;">Status da Conta:</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="label-status-anonimo-coordenador" class="label-pequeno" style="margin-bottom:0;">Ativa</span>
+                            <label class="switch">
+                                <input type="checkbox" id="check-anonimo-coordenador" onchange="toggleModoAnonimoPerfil('coordenador')">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="perfil-senha-secao">
+                        <div class="senha-linha">
+                            <span class="label-pequeno">Senha:</span>
+                            <span id="perfil-senha-texto-coordenador" class="senha-pontos">••••••••</span>
+                            <button class="btn-icone" onclick="toggleMostrarSenha('coordenador')" title="Mostrar Senha">👁️</button>
+                            <button class="btn-link" onclick="toggleMudarSenhaForm('coordenador')">Mudar senha</button>
+                        </div>
+
+                        <div id="form-mudar-senha-coordenador" class="hidden mudar-senha-box">
+                            <input type="password" id="senha-antiga-coordenador" placeholder="Senha antiga">
+                            <input type="password" id="senha-nova-coordenador" placeholder="Nova senha">
+                            <input type="password" id="senha-confirma-coordenador" placeholder="Confirme a nova senha">
+                            <div class="btn-senha-grupo">
+                                <button class="btn-salvar" onclick="salvarNovaSenha('coordenador')">Confirmar</button>
+                                <button class="btn-cancelar" onclick="toggleMudarSenhaForm('coordenador')">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="perfil-acoes">
+                        <button class="btn-medio btn-sair" onclick="sairPerfil()">Sair</button>
+                        <button class="btn-medio btn-excluir" onclick="excluirConta()">Excluir Conta</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Mudar Foto, Nome e Biografia -->
+    <div id="modal-edicao" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Editar Perfil</h3>
+            <div class="form-edicao">
+                <label class="label-pequeno">Nova foto (da galeria)</label>
+                <input type="file" id="input-nova-foto" accept="image/*">
+                
+                <label class="label-pequeno">Novo nome</label>
+                <input type="text" id="input-novo-nome" placeholder="Seu nome">
+
+                <label class="label-pequeno">Biografia / Descrição</label>
+                <textarea id="input-nova-bio" placeholder="Escreva sobre você..."></textarea>
+
+                <div class="btn-senha-grupo" style="margin-top: 15px;">
+                    <button class="btn-salvar" onclick="salvarEdicaoPerfil()">Salvar Alterações</button>
+                    <button class="btn-cancelar" onclick="fecharModalEdicao()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
